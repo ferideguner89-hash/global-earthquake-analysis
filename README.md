@@ -14,7 +14,9 @@ toplanmış, temizlenmiş ve görselleştirilmiştir.
 - Deprem sayısı: 8.559
 - Minimum büyüklük: 4.5
 - Kullanılan alanlar: ID, büyüklük, konum, zaman,
-  enlem, boylam ve derinlik
+  enlem, boylam ve derinlik 
+- Veri toplama tarihi: 20 Kasım 2026
+
 
 ## Araştırma Soruları
 1. Depremler aylara göre nasıl dağılıyor?
@@ -34,16 +36,25 @@ toplanmış, temizlenmiş ve görselleştirilmiştir.
 ## Bulgular
 
 ### Aylık Deprem Dağılımı
+
+![2025 Yılı Aylık Deprem Dağılımı](figures/monthly_earthquakes_2025.png)
+
 En fazla deprem temmuz ayında (1.321),
 en az deprem mart ayında (539) gerçekleşmiştir.
 Aylık ortalama deprem sayısı 713,25'tir.
 
 ### Derinlik ve Büyüklük İlişkisi
+
+![Deprem Derinliği ve Büyüklüğü İlişkisi](figures/depth_magnitude_scatter.png)
+
 Pearson korelasyon katsayısı -0.046 bulunmuştur.
 İki değişken arasında belirgin doğrusal ilişki
 gözlemlenmemiştir.
 
 ### Coğrafi Dağılım
+
+![Depremlerin Coğrafi Dağılımı](figures/earthquake_locations_2025.png)
+
 Depremler dünya üzerinde homojen dağılmamaktadır.
 Japonya, Endonezya, Alaska ve Güney Amerika'nın
 batı kıyılarında yoğunlaşmalar görülmektedir.
