@@ -1,74 +1,101 @@
 # Global Earthquake Data Analysis
 
 ## Proje Amacı
-Bu projede, USGS Earthquake API'den elde edilen, 2025 yılında dünya genelinde raporlanmış **4.5 ve üzeri büyüklükteki** depremler incelenmektedir. Python kullanılarak veri toplama, temizlik, keşifsel analiz ve görselleştirme gerçekleştirilir.
 
-## Veri Kaynağı ve Kapsam
-- Kaynak: [USGS Earthquake Catalog](https://earthquake.usgs.gov/fdsnws/event/1/)
-- Zaman aralığı: 1 Ocak–31 Aralık 2025 (UTC; sorguda bitiş tarihi 1 Ocak 2026)
-- Minimum raporlanan büyüklük: 4.5
-- İlk analizde kullanılan katalog anlık görüntüsü: **8.559 deprem** (20 Kasım 2026 tarihli çalışma)
-- Alanlar: deprem kimliği, raporlanan büyüklük, **büyüklük türü (`magType`)**, konum açıklaması, zaman, enlem, boylam ve derinlik.
+Bu projede, 2025 yılında dünya genelinde meydana gelen 4.5 ve üzeri büyüklükteki depremler analiz edilmiştir.
 
-**Veri güncelliği:** USGS kayıtları sonradan revize edilebilir. API'den yeni sorgu yapıldığında veri sayısı veya sonuçlar değişebilir. Aşağıda verilen önceki bulgular depoda bulunan ilk veri sürümünü anlatır; notebook yeniden çalıştırıldığında yeni sonuçlar konsolda ve grafiklerde hesaplanır.
+Veriler USGS Earthquake API üzerinden Python kullanılarak toplanmış, temizlenmiş ve görselleştirilmiştir. Çalışmada depremlerin aylık dağılımı, büyüklük–derinlik ilişkisi ve coğrafi yoğunlukları incelenmiştir.
+
+## Veri Kaynağı
+
+- **Kaynak:** [USGS Earthquake Catalog](https://earthquake.usgs.gov/fdsnws/event/1/)
+- **Dönem:** 1 Ocak – 31 Aralık 2025
+- **Deprem sayısı:** 8.559
+- **Minimum büyüklük:** 4.5
+- **Veri toplama tarihi:** 20 Kasım 2026
+- **Kullanılan alanlar:** Deprem kimliği, büyüklük, büyüklük türü (`magType`), konum, zaman, enlem, boylam ve derinlik
 
 ## Araştırma Soruları
-1. Depremler aylara nasıl dağılıyor ve Temmuz 2025 artışı hangi bölge etiketlerinde yoğunlaşıyor?
-2. Raporlanan büyüklük ile derinlik arasında doğrusal ilişki var mı? Büyüklük türüne göre sonuçlar değişiyor mu?
-3. Depremler coğrafi olarak nerelerde kümeleniyor? Bu dağılım dünya haritasında nasıl görünüyor?
+
+1. Depremler aylara göre nasıl dağılıyor ve temmuz ayındaki artış hangi bölgelerde yoğunlaşıyor?
+2. Deprem büyüklüğü ile derinliği arasında ilişki var mı? Bu ilişki büyüklük türlerine göre değişiyor mu?
+3. Depremler dünya genelinde hangi coğrafi bölgelerde yoğunlaşıyor?
 
 ## Yöntem
-1. USGS API'den her ay ayrı sorgulanır. Geçici HTTP hatalarında **yeniden deneme** uygulanır; tamamlanan aylar `data/raw/monthly_2025/` altında saklanır. Var olan ham veri dosyası da kullanılabilir.
-2. Kayıtlar deprem kimliğine (`id`) göre tekilleştirilir. Eksikler, zaman, koordinatlar ve minimum büyüklük doğrulanır.
-3. Temiz veriye `magType` eklenir ve `data/processed/earthquakes_2025_clean.csv` dosyasına kaydedilir.
-4. Aylık dağılım, temmuz ayındaki bölge etiketleri, tür bazında büyüklük–derinlik ilişkisi ve coğrafi dağılım görselleştirilir.
-5. `cartopy` kullanılabiliyorsa harita üzerinde kıyı çizgileri gösterilir; harita verisi elde edilemediğinde koordinat grafiğine geri dönülür.
+
+1. USGS API üzerinden 2025 yılına ait deprem verileri aylık sorgularla toplandı.
+2. Veri toplama koduna başarısız istekleri yeniden deneme ve aylık verileri ayrı kaydetme mekanizması eklendi.
+3. Tekrar eden kayıtlar deprem kimliğine göre kontrol edildi.
+4. Eksik değerler, koordinatlar ve büyüklük bilgileri incelendi.
+5. Veriler pandas kullanılarak temizlendi ve CSV formatında kaydedildi.
+6. Matplotlib kullanılarak istatistiksel analizler ve görselleştirmeler hazırlandı.
+7. Bölgesel deprem dağılımı, büyüklük türleri ve dünya haritası için ek analizler geliştirildi.
 
 ## Bulgular
 
-### Aylık deprem dağılımı
+### 1. Aylık Deprem Dağılımı
 
-![2025 aylık deprem dağılımı](figures/monthly_earthquakes_2025.png)
+![Aylık Deprem Dağılımı](figures/monthly_earthquakes_2025.png)
 
-İlk veri sürümünde en çok deprem **Temmuz (1.321)**, en az deprem **Mart (539)** ayında kayıtlıdır. Aylık ortalama 713,25'tir. Temmuz ayındaki 1.321 kaydın **704'ünün** USGS `place` açıklaması `Russia` ile bitmektedir (**%53,3**). Diğer öne çıkan konum etiketleri Japonya (93) ve Endonezya'dır (72). Bu durum Temmuz zirvesinin coğrafi olarak eşit dağılmadığını göstermektedir; tek bir yıl mevsimsel bir desen ortaya koymak için yeterli değildir.
+2025 yılında en fazla deprem **temmuz ayında (1.321)**, en az deprem ise **mart ayında (539)** kaydedilmiştir.
 
-Güncellenmiş notebook'un üreteceği ek grafik: `figures/july_2025_regions.png`.
+Aylık ortalama deprem sayısı **713,25** olarak hesaplanmıştır.
 
-### Derinlik–büyüklük ilişkisi ve büyüklük türleri
+Temmuz ayındaki artışı daha ayrıntılı incelemek amacıyla konum açıklamaları üzerinden bölgesel analiz yapılmıştır. Temmuz ayında kaydedilen 1.321 depremin 704'ünün (%53,3) konum açıklaması Rusya ile bitmektedir.
 
-![Deprem derinliği ve büyüklüğü](figures/depth_magnitude_scatter.png)
+Bu bulgu, temmuz ayındaki yüksek deprem sayısının belirli coğrafi bölgelerde yoğunlaştığını göstermektedir.
 
-İlk analizde Pearson korelasyon katsayısı yaklaşık **-0,046** bulunmuştur; bu değer çok zayıf bir doğrusal ilişkiye işaret eder. Ancak USGS büyüklükleri `magType` alanında farklı ölçeklerle (ör. `mb`, `mww`, `ml` gibi) raporlayabilir. Ölçeklerin hepsi aynı şekilde yorumlanmamalıdır. Güncellenmiş notebook türlerin frekanslarını ve **en az 30 örnekli türlerde** büyüklük–derinlik korelasyonunu ayrı hesaplar. Bu ek analiz için önceden sonuç uydurulmamıştır; notebook çalıştırıldığında sayılar üretilecektir.
+### 2. Deprem Büyüklüğü ve Derinlik İlişkisi
 
-Güncellenmiş notebook'un üreteceği ek grafik: `figures/magnitude_type_distribution.png`.
+![Büyüklük ve Derinlik İlişkisi](figures/depth_magnitude_scatter.png)
 
-### Coğrafi dağılım
+Deprem büyüklüğü ile derinliği arasındaki Pearson korelasyon katsayısı **-0,046** olarak bulunmuştur.
 
-![Deprem koordinatları](figures/earthquake_locations_2025.png)
+Bu değer, iki değişken arasında çok zayıf negatif doğrusal ilişki olduğunu göstermektedir.
 
-Depremler dünya üzerinde homojen dağılmaz. Japonya, Endonezya, Alaska ve Güney Amerika'nın batı kıyılarında kümelenme görülür. Dünya haritası üzerinde yeni görselleştirme `figures/earthquake_world_map_2025.png` adıyla üretilebilir.
+Ayrıca depremlerin farklı büyüklük türlerinde raporlanabileceği dikkate alınarak `magType` dağılımını ve türlere göre büyüklük–derinlik ilişkisini inceleyen ek analizler geliştirilmiştir.
+
+### 3. Depremlerin Coğrafi Dağılımı
+
+![Depremlerin Coğrafi Dağılımı](figures/earthquake_locations_2025.png)
+
+Depremlerin dünya üzerinde homojen dağılmadığı, belirli tektonik bölgelerde yoğunlaştığı gözlemlenmiştir.
+
+Özellikle Japonya, Endonezya, Alaska ve Güney Amerika'nın batı kıyılarında deprem kümelenmeleri dikkat çekmektedir.
+
+Bu dağılım, tektonik levha sınırları boyunca görülen deprem hareketliliğiyle uyumludur.
+
+Coğrafi dağılımı daha anlaşılır göstermek amacıyla dünya haritası üzerinde deprem konumlarını görselleştiren ek kod geliştirilmiştir.
 
 ## Sınırlılıklar
-- Yalnızca 2025 yılı ve en az 4.5 raporlanan büyüklükteki olaylar incelenmiştir.
-- USGS katalog kayıtları zaman içerisinde güncellenebilir.
-- `place` metninden bölge çıkarımı **yaklaşık, hiyerarşik olmayan** bir etiket ayrıştırmasıdır: ülkeler, eyaletler ve deniz bölgeleri birlikte yer alabilir.
-- `magType` ölçeklerinin farklılığı karşılaştırmaları etkileyebilir; tür bazında korelasyon nedensellik kanıtı değildir.
-- Katalog eşik değerleri ve algılama özellikleri nedeniyle coğrafi kayıt yoğunlukları, tüm depremselliği ölçmez.
-- Cartopy kıyı çizgilerinin ilk indirmesinde internet gerekebilir.
 
-## Kurulum ve Çalıştırma
+- Analiz yalnızca 2025 yılını kapsamaktadır.
+- Sadece 4.5 ve üzeri büyüklükteki depremler incelenmiştir.
+- USGS kayıtları zaman içerisinde güncellenebilir.
+- Farklı büyüklük türleri arasındaki ölçüm farklılıkları sonuçları etkileyebilir.
+- Bölgesel sınıflandırma konum açıklamalarına dayandığından yaklaşık sonuçlar verir.
+- Tek yıllık verilerden uzun dönemli veya mevsimsel deprem eğilimleri çıkarılamaz.
 
-Python 3.10 veya üzeri önerilir.
+## Kullanılan Teknolojiler
+
+- Python
+- Google Colab / Jupyter Notebook
+- pandas
+- requests
+- Matplotlib
+- Cartopy
+- USGS Earthquake API
+
+## Çalıştırma
+
+Gerekli Python kütüphanelerini yüklemek için:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-1. `notebooks/global_earthquake_analysis.ipynb` dosyasını VS Code veya Google Colab ile açın.
-2. Repo kökünden çalıştırın (veya notebook'a uygun `data` klasörünü erişilebilir kılın).
-3. İlk çalıştırmada **`USE_EXISTING_RAW = True`**, `data/raw/earthquakes_2025.json` mevcutsa internet kullanmadan bu dosyayı yükler. Aylık API sorgusunu yeniden yapmak için **`USE_EXISTING_RAW = False`** yapın.
-4. Hücreleri sırayla çalıştırın. Yenilenen CSV dosyası `data/processed/`, grafikler `figures/` altına kaydedilir.
-5. Notebook **README.md'yi otomatik yeniden yazmaz**; README yalnızca metin düzenleyicisiyle güncellenir.
-
-## Teknolojiler
-Python, pandas, matplotlib, requests, Cartopy (isteğe bağlı), Jupyter / Google Colab ve USGS Earthquake API.
+1. `notebooks/global_earthquake_analysis.ipynb` dosyasını açın.
+2. Projenin veri klasörünün erişilebilir olduğundan emin olun.
+3. Mevcut ham verileri kullanmak için `USE_EXISTING_RAW = True` ayarını seçin.
+4. Notebook hücrelerini sırasıyla çalıştırın.
+5. İşlenmiş veriler `data/processed`, grafikler ise `figures` klasörüne kaydedilir.
